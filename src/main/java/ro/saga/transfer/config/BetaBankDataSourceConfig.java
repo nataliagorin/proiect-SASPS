@@ -1,5 +1,6 @@
 package ro.saga.transfer.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,7 +43,8 @@ public class BetaBankDataSourceConfig {
     }
 
     @Bean(DATA_SOURCE)
-    DataSource betaBankDataSource(@Qualifier(DATA_SOURCE_PROPERTIES) DataSourceProperties properties) {
+    @ConfigurationProperties("app.datasource.beta-bank.hikari")
+    HikariDataSource betaBankDataSource(@Qualifier(DATA_SOURCE_PROPERTIES) DataSourceProperties properties) {
         return persistenceFactory.createDataSource(properties, BANK_NAME);
     }
 

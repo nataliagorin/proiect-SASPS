@@ -25,7 +25,7 @@ public class BankPersistenceFactory {
             AvailableSettings.HBM2DDL_AUTO, "validate",
             AvailableSettings.PHYSICAL_NAMING_STRATEGY, PhysicalNamingStrategySnakeCaseImpl.class.getName());
 
-    public DataSource createDataSource(DataSourceProperties properties, String bankName) {
+    public HikariDataSource createDataSource(DataSourceProperties properties, String bankName) {
         HikariDataSource dataSource = properties.initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
                 .build();
