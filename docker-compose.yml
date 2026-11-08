@@ -12,28 +12,28 @@ x-bank-database: &bank-database
   restart: unless-stopped
 
 services:
-  bank-a:
+  alpha-bank:
     <<: *bank-database
-    container_name: saga-bank-a
+    container_name: saga-alpha-bank
     environment:
       <<: *bank-database-credentials
-      POSTGRES_DB: bank_a
+      POSTGRES_DB: alpha_bank
     ports:
       - "5432:5432"
     volumes:
-      - bank_a_data:/var/lib/postgresql/data
+      - alpha_bank_data:/var/lib/postgresql/data
 
-  bank-b:
+  beta-bank:
     <<: *bank-database
-    container_name: saga-bank-b
+    container_name: saga-beta-bank
     environment:
       <<: *bank-database-credentials
-      POSTGRES_DB: bank_b
+      POSTGRES_DB: beta_bank
     ports:
       - "5433:5432"
     volumes:
-      - bank_b_data:/var/lib/postgresql/data
+      - beta_bank_data:/var/lib/postgresql/data
 
 volumes:
-  bank_a_data:
-  bank_b_data:
+  alpha_bank_data:
+  beta_bank_data:
