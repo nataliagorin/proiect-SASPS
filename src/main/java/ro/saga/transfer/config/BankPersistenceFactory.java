@@ -20,7 +20,6 @@ public class BankPersistenceFactory {
 
     private static final String MIGRATION_LOCATION_PREFIX = "classpath:db/migration/";
 
-
     private static final Map<String, Object> HIBERNATE_PROPERTIES = Map.of(
             AvailableSettings.HBM2DDL_AUTO, "validate",
             AvailableSettings.PHYSICAL_NAMING_STRATEGY, PhysicalNamingStrategySnakeCaseImpl.class.getName());
