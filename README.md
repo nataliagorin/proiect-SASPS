@@ -1,5 +1,7 @@
 # Saga Pattern: Transfer bancar
 
+[![Build](https://github.com/nataliagorin/proiect-SASPS/actions/workflows/build.yml/badge.svg)](https://github.com/nataliagorin/proiect-SASPS/actions/workflows/build.yml)
+
 Proiectul este un studiu comparativ al pattern-ului **Saga**, aplicat unui scenariu de transfer bancar între două bănci diferite. Într-un astfel de transfer nu putem folosi o singură tranzacție ACID, așa că consistența este asigurată printr-o secvență de tranzacții locale, fiecare cu o compensare asociată în caz de eșec.
 
 Vor fi implementate și comparate:
@@ -30,6 +32,16 @@ Saga, Command, State, Observer, Circuit Breaker, Event Sourcing
 - **Docker** (Docker Desktop pe Windows/macOS)
 
 Maven nu trebuie instalat: proiectul folosește Maven Wrapper (`mvnw`).
+
+## Build și teste
+
+```bash
+./mvnw clean install        # pe Windows: .\mvnw.cmd clean install
+```
+
+**Docker trebuie să fie pornit și pentru build**, nu doar pentru rulare: testele folosesc [Testcontainers](https://testcontainers.com/) și pornesc singure două containere PostgreSQL temporare. Testul de pornire verifică că aplicația pornește, că migrațiile Flyway rulează pe ambele bănci și că `GET /health/banks` răspunde 200. Nu e nevoie de `docker compose up` pentru teste.
+
+Același build rulează automat în GitHub Actions la fiecare push în `main` și la fiecare Pull Request.
 
 ## Rulare
 
@@ -103,11 +115,15 @@ Diagrama și deciziile de arhitectură sunt în [docs/architecture.md](docs/arch
 
 ```
 .
+├── .github/workflows/build.yml         # build-ul automat în GitHub Actions
+├── .editorconfig                       # reguli comune de formatare
 ├── docker-compose.yml                  # cele două baze PostgreSQL (alpha_bank, beta_bank)
 ├── docs/
 │   └── architecture.md                 # diagrama și deciziile de arhitectură
 ├── pom.xml
 ├── mvnw, mvnw.cmd, .mvn/               # Maven Wrapper
+├── src/test/java/ro/saga/transfer/
+│   └── ApplicationStartupTest.java     # testul de pornire cu Testcontainers
 └── src/main/
     ├── java/ro/saga/transfer/
     │   ├── SagaTransferApplication.java
