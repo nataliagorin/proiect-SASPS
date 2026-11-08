@@ -1,4 +1,4 @@
 /**
  * Saga transfer coordinated through exchanged events.
  */
-package ro.saga.transfer.variants.choreography;
+package ro.saga.transfer.choreography;
