@@ -17,7 +17,7 @@ Tipurile din `ro.saga.transfer.common` sunt folosite de toate variantele de tran
 | `FraudCheckService`, `FraudDecision` | Verificare antifraudă simulată: `APPROVED` sau `REJECTED`; poate arunca `BankUnavailableException` la timeout. |
 | `AuditService` | Audit/notificare la finalul transferului. Dacă pică, se reia; nu anulează transferul. |
 
-Până la merge-ul `feature/fault-injection`, `SimulatedServicesConfig` dă implementări care nu pică niciodată (`FaultInjector.NONE`, antifraudă care aprobă tot, audit gol), ca variantele să poată fi deja injectate. P1 le înlocuiește cu cele reale și șterge clasa.
+Implementările simulate sunt `SimulatedFaultInjector`, `SimulatedFraudCheckService` și `SimulatedAuditService` (pachetele `fault`, `fraud`, `audit`). Cu valorile implicite din `application.yml` nu pică nimic și antifrauda aprobă tot. Benchmark-ul le schimbă configurația între rulări cu `reconfigure(...)`. În testele unei variante, `FaultInjector` se poate da direct ca lambda.
 
 ## Fluxul și locurile de eșec
 

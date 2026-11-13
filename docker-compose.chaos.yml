@@ -1,0 +1,19 @@
+# Toxiproxy in front of both banks, for latency and outage scenarios.
+# docker compose -f docker-compose.yml -f docker-compose.chaos.yml up -d
+# The app goes through the proxy only with the "chaos" profile; the direct ports stay the default.
+services:
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.9.0
+    container_name: saga-toxiproxy
+    command: ["-host=0.0.0.0", "-config=/config/toxiproxy.json"]
+    volumes:
+      - ./docker/toxiproxy.json:/config/toxiproxy.json:ro
+    ports:
+      - "8474:8474"   # control API
+      - "15432:15432" # Alpha Bank
+      - "15433:15433" # Beta Bank
+    depends_on:
+      alpha-bank:
+        condition: service_healthy
+      beta-bank:
+        condition: service_healthy

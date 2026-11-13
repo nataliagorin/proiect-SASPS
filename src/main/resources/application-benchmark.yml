@@ -1,0 +1,19 @@
+# Activated only with --spring.profiles.active=benchmark; never during the build or tests.
+# The run matrix (app.benchmark.*) is added by the benchmark.
+spring:
+  main:
+    web-application-type: none
+
+app:
+  datasource:
+    alpha-bank:
+      hikari:
+        maximum-pool-size: 10
+    beta-bank:
+      hikari:
+        maximum-pool-size: 10
+
+logging:
+  level:
+    root: WARN
+    ro.saga.transfer: INFO
