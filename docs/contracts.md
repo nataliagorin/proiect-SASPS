@@ -17,6 +17,8 @@ Tipurile din `ro.saga.transfer.common` sunt folosite de toate variantele de tran
 | `FraudCheckService`, `FraudDecision` | Verificare antifraudă simulată: `APPROVED` sau `REJECTED`; poate arunca `BankUnavailableException` la timeout. |
 | `AuditService` | Audit/notificare la finalul transferului. Dacă pică, se reia; nu anulează transferul. |
 
+Până la merge-ul `feature/fault-injection`, `SimulatedServicesConfig` dă implementări care nu pică niciodată (`FaultInjector.NONE`, antifraudă care aprobă tot, audit gol), ca variantele să poată fi deja injectate. P1 le înlocuiește cu cele reale și șterge clasa.
+
 ## Fluxul și locurile de eșec
 
 | Pas | Ce face | Tip | `FaultPoint` |
@@ -30,14 +32,16 @@ Tipurile din `ro.saga.transfer.common` sunt folosite de toate variantele de tran
 
 ## Rezultat și stare
 
-| Situație | `outcome` | `status` la întoarcerea apelului |
-|---|---|---|
-| Totul a mers | `COMPLETED` | `COMPLETED` |
-| Fonduri insuficiente, nimic nu s-a schimbat | `REJECTED_INSUFFICIENT_FUNDS` | `FAILED` |
-| Antifraudă a respins, debitul a fost returnat | `REJECTED_FRAUD` | `COMPENSATED` |
-| Eroare tehnică, debitul a fost returnat | `COMPENSATED` | `COMPENSATED` |
-| Eroare tehnică înainte de orice efect | `FAILED_TECHNICAL` | `FAILED` |
-| Eroare tehnică, compensarea nu a reușit încă | `FAILED_TECHNICAL` | `PENDING` (îl preia recuperarea) |
+| Situație | `outcome` | `status` la întoarcerea apelului | Factory în `TransferResult` |
+|---|---|---|---|
+| Totul a mers | `COMPLETED` | `COMPLETED` | `completed(id)` |
+| Fonduri insuficiente, nimic nu s-a schimbat | `REJECTED_INSUFFICIENT_FUNDS` | `FAILED` | `rejectedInsufficientFunds()` |
+| Antifraudă a respins, debitul a fost returnat | `REJECTED_FRAUD` | `COMPENSATED` | `rejectedFraud(id)` |
+| Eroare tehnică, debitul a fost returnat | `COMPENSATED` | `COMPENSATED` | `compensated(id, reason)` |
+| Eroare tehnică înainte de orice efect | `FAILED_TECHNICAL` | `FAILED` | `failedBeforeDebit(reason)` |
+| Eroare tehnică, compensarea nu a reușit încă | `FAILED_TECHNICAL` | `PENDING` (îl preia recuperarea) | `awaitingRecovery(id, reason)` |
+
+Toate variantele construiesc rezultatul doar prin aceste metode, ca mesajele să fie la fel.
 
 ## Reguli de acceptare pentru orice variantă
 
@@ -64,6 +68,8 @@ Timpul dintre `created_at` (commit-ul debitului) și `finalized_at` (starea term
 | `app.benchmark.variants`, `.transfers`, `.warmup-transfers`, `.failure-rates`, `.threads`, `.repetitions`, `.seed`, `.output-dir` | `feature/benchmark` | Matricea de rulare, în `application-benchmark.yml` |
 
 ## Schema CSV a benchmark-ului
+
+Cum se obține fiecare coloană și protocolul de rulare sunt în [experiments.md](experiments.md).
 
 Un rând pe configurație și repetare, în `results/`. Timpii sunt în milisecunde.
 

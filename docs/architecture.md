@@ -78,4 +78,4 @@ flowchart TB
 
 ## Ce urmează
 
-Variantele de transfer (naiv, 2PC, Saga cu orchestrare și Saga cu coreografie) vor fi adăugate în pachetele `naive`, `twophase`, `orchestration` și `choreography`, ca implementări ale unei interfețe comune. Pentru anti-pattern-ul shared database va fi adăugat un al treilea container PostgreSQL.
+Variantele de transfer (V1 Plain-Correct, Saga cu orchestrare, Saga cu coreografie, 2PC) vor fi adăugate în pachetele `plain`, `orchestration`, `choreography` și `twophase`, ca implementări ale `TransferService` din `common`. Pentru anti-pattern-ul shared database va fi adăugat un al treilea container PostgreSQL.
