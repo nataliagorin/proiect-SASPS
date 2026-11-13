@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: saga-transfer
+
+app:
+  datasource:
+    alpha-bank:
+      url: jdbc:postgresql://localhost:5432/alpha_bank
+      username: saga
+      password: saga
+      hikari:
+        connection-timeout: 3000
+    beta-bank:
+      url: jdbc:postgresql://localhost:5433/beta_bank
+      username: saga
+      password: saga
+      hikari:
+        connection-timeout: 3000
