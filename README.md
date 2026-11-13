@@ -115,6 +115,30 @@ docker exec saga-alpha-bank psql -U saga -d alpha_bank -c "select version, descr
 docker exec saga-beta-bank psql -U saga -d beta_bank -c "select version, description, success from flyway_schema_history"
 ```
 
+## Erori simulate
+
+Implicit nu pică nimic. Erorile din cod se pornesc din proprietăți, de exemplu:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.arguments="--app.fault.rate=0.1 --app.fault.points=AFTER_DEBIT --app.fraud.max-amount=500"
+```
+
+Erorile de rețea (latență, bancă căzută) trec prin Toxiproxy:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.chaos.yml up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=chaos
+```
+
+Beta Bank „cade” și revine prin API-ul Toxiproxy:
+
+```bash
+curl -X POST localhost:8474/proxies/beta_bank -d '{"enabled":false}'
+curl -X POST localhost:8474/proxies/beta_bank -d '{"enabled":true}'
+```
+
+Metricile sunt la `GET /actuator/metrics/transfer.duration`.
+
 ## Arhitectura
 
 Diagrama și deciziile de arhitectură sunt în [docs/architecture.md](docs/architecture.md).
@@ -126,6 +150,8 @@ Diagrama și deciziile de arhitectură sunt în [docs/architecture.md](docs/arch
 ├── .github/workflows/build.yml         # build-ul automat în GitHub Actions
 ├── .editorconfig                       # reguli comune de formatare
 ├── docker-compose.yml                  # cele două baze PostgreSQL (alpha_bank, beta_bank)
+├── docker-compose.chaos.yml            # Toxiproxy în fața băncilor
+├── docker/toxiproxy.json               # proxy-urile Toxiproxy
 ├── docs/
 │   ├── architecture.md                 # diagrama și deciziile de arhitectură
 │   ├── contracts.md                    # contractele comune tuturor variantelor
@@ -138,19 +164,25 @@ Diagrama și deciziile de arhitectură sunt în [docs/architecture.md](docs/arch
 └── src/main/
     ├── java/ro/saga/transfer/
     │   ├── SagaTransferApplication.java
+    │   ├── audit/                      # audit simulat
     │   ├── bank/                       # operațiile pe bănci, LedgerService, invarianți
     │   │   ├── alpha/                  # entitatea și repository-ul Alpha Bank
     │   │   └── beta/                   # entitatea și repository-ul Beta Bank
     │   ├── benchmark/                  # măsurătorile (urmează)
     │   ├── choreography/               # Saga cu coreografie (urmează)
     │   ├── common/                     # contractele comune variantelor de transfer
-    │   ├── config/                     # DataSource, JPA, Flyway, servicii simulate
-        │   ├── orchestration/              # Saga cu orchestrare (urmează)
-│   ├── plain/                      # V1 Plain-Correct (urmează)
+    │   ├── config/                     # DataSource, JPA, Flyway
+    │   ├── fault/                      # FaultInjector simulat
+    │   ├── fraud/                      # antifraudă simulată
+    │   ├── observability/              # timer-ul transfer.duration
+    │   ├── orchestration/              # Saga cu orchestrare (urmează)
+    │   ├── plain/                      # V1 Plain-Correct (urmează)
     │   ├── twophase/                   # Two-phase commit (urmează)
     │   └── web/                        # controller-ele REST
     └── resources/
-        ├── application.yml             # conexiunile la cele două bănci
+        ├── application.yml             # conexiunile la bănci, erori simulate
+        ├── application-benchmark.yml   # profilul benchmark
+        ├── application-chaos.yml       # conexiuni prin Toxiproxy
         └── db/migration/
             ├── alpha_bank/             # migrațiile Flyway pentru Alpha Bank
             └── beta_bank/              # migrațiile Flyway pentru Beta Bank

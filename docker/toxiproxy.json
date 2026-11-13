@@ -1,0 +1,14 @@
+[
+  {
+    "name": "alpha_bank",
+    "listen": "0.0.0.0:15432",
+    "upstream": "alpha-bank:5432",
+    "enabled": true
+  },
+  {
+    "name": "beta_bank",
+    "listen": "0.0.0.0:15433",
+    "upstream": "beta-bank:5432",
+    "enabled": true
+  }
+]

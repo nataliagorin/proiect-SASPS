@@ -11,8 +11,11 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import ro.saga.transfer.common.FaultInjector;
 import ro.saga.transfer.config.AlphaBankDataSourceConfig;
 import ro.saga.transfer.config.BetaBankDataSourceConfig;
+import ro.saga.transfer.fault.SimulatedFaultInjector;
+import ro.saga.transfer.fraud.SimulatedFraudCheckService;
 
 import java.util.List;
 
@@ -82,5 +85,19 @@ class ApplicationStartupTest {
                           }
                         }
                         """);
+    }
+
+    @Test
+    void wiresSimulatedServicesWithSafeDefaults(
+            @Autowired FaultInjector faultInjector, @Autowired SimulatedFraudCheckService fraud) {
+        assertThat(faultInjector).isInstanceOf(SimulatedFaultInjector.class);
+        assertThat(((SimulatedFaultInjector) faultInjector).properties().rate()).isZero();
+        assertThat(fraud.properties().maxAmount()).isNull();
+        assertThat(fraud.properties().blockedAccounts()).isEmpty();
+    }
+
+    @Test
+    void exposesActuatorHealth() {
+        assertThat(mockMvc.get().uri("/actuator/health")).hasStatusOk();
     }
 }

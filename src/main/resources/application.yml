@@ -10,9 +10,26 @@ app:
       password: saga
       hikari:
         connection-timeout: 3000
+        maximum-pool-size: 10
     beta-bank:
       url: jdbc:postgresql://localhost:5433/beta_bank
       username: saga
       password: saga
       hikari:
         connection-timeout: 3000
+        maximum-pool-size: 10
+
+  # Simulated failures; rate 0 means none. An empty points list means every FaultPoint.
+  fault:
+    seed: 42
+    rate: 0.0
+    points: []
+  fraud:
+    latency-ms: 0
+    blocked-accounts: []
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics
