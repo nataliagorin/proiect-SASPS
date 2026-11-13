@@ -1,19 +1,27 @@
-# Saga Pattern: Transfer bancar
+# Transfer bancar distribuit, cu și fără design patterns
 
 [![Build](https://github.com/nataliagorin/proiect-SASPS/actions/workflows/build.yml/badge.svg)](https://github.com/nataliagorin/proiect-SASPS/actions/workflows/build.yml)
 
-Proiectul este un studiu comparativ al pattern-ului **Saga**, aplicat unui scenariu de transfer bancar între două bănci diferite. Într-un astfel de transfer nu putem folosi o singură tranzacție ACID, așa că consistența este asigurată printr-o secvență de tranzacții locale, fiecare cu o compensare asociată în caz de eșec.
+Proiectul compară implementări **fără** și **cu** design patterns ale aceluiași transfer între două bănci diferite (Alpha Bank și Beta Bank). Între bănci nu există o tranzacție ACID comună, așa că transferul este o secvență de tranzacții locale: validare, debit, verificare antifraudă, credit, finalizare și audit, cu compensare la eșec.
 
-Vor fi implementate și comparate:
+Toate variantele sunt corecte: niciun ban pierdut sau creat, niciun transfer rămas `PENDING`. Le comparăm prin:
 
-- varianta **naivă**, fără garanții de consistență distribuită
-- Saga cu **orchestrare** (coordonator central)
-- Saga cu **coreografie** (comunicare prin evenimente)
-- **Two-phase commit (2PC)**, ca punct de referință
+- **costul corectitudinii**: fereastra de inconsistență (cât stau banii „în zbor”), timpul de recuperare după erori sau crash;
+- **performanță**: latență și throughput, sub rate de eșec și număr de thread-uri diferite;
+- **structura codului**: metrici și grafuri de dependențe, plus costul adăugării unui pas nou.
 
-Pentru fiecare variantă vor fi măsurate latența, throughput-ul, comportamentul la eșecuri parțiale și corectitudinea (suma totală a banilor din sistem rămâne constantă). Proiectul va ilustra și o serie de **anti-pattern-uri** (lipsa idempotenței, dual write, compensări fără retry, bază de date partajată) și efectele lor.
+| Variantă | Pattern-uri | Milestone |
+|---|---|---|
+| V1 Plain-Correct | niciunul (cod procedural) | M1 |
+| V2 Saga orchestrată | Command, State | M2 |
+| V3 Saga coreografiată | Observer | M2 |
+| V4 Two-Phase Commit | referință arhitecturală | M2 |
+| V5 Workflow Temporal | orchestrare durabilă | M2/M3 |
+| V6 Saga + Circuit Breaker | Circuit Breaker | M3 |
+| V7 Ledger cu Event Sourcing | Event Sourcing | M3 |
+| A1–A4 Anti-pattern-uri | lipsa idempotenței, compensare fără retry, dual write, shared database | M3 |
 
-În acest moment este gata infrastructura: aplicația Spring Boot, cele două bănci (Alpha Bank și Beta Bank) cu baze de date PostgreSQL separate, migrațiile Flyway și un endpoint de verificare a conexiunilor.
+Contractele comune sunt în [docs/contracts.md](docs/contracts.md), modelul de date în [docs/data-model.md](docs/data-model.md), iar metodologia experimentelor în [docs/experiments.md](docs/experiments.md).
 
 ## Pattern-uri folosite
 
@@ -119,7 +127,10 @@ Diagrama și deciziile de arhitectură sunt în [docs/architecture.md](docs/arch
 ├── .editorconfig                       # reguli comune de formatare
 ├── docker-compose.yml                  # cele două baze PostgreSQL (alpha_bank, beta_bank)
 ├── docs/
-│   └── architecture.md                 # diagrama și deciziile de arhitectură
+│   ├── architecture.md                 # diagrama și deciziile de arhitectură
+│   ├── contracts.md                    # contractele comune tuturor variantelor
+│   ├── data-model.md                   # tabelele și operațiile pe bănci
+│   └── experiments.md                  # ipoteze, factori, metrici, protocol
 ├── pom.xml
 ├── mvnw, mvnw.cmd, .mvn/               # Maven Wrapper
 ├── src/test/java/ro/saga/transfer/
@@ -127,15 +138,15 @@ Diagrama și deciziile de arhitectură sunt în [docs/architecture.md](docs/arch
 └── src/main/
     ├── java/ro/saga/transfer/
     │   ├── SagaTransferApplication.java
-    │   ├── bank/                       # serviciile comune băncilor (verificarea conexiunilor)
+    │   ├── bank/                       # operațiile pe bănci, LedgerService, invarianți
     │   │   ├── alpha/                  # entitatea și repository-ul Alpha Bank
     │   │   └── beta/                   # entitatea și repository-ul Beta Bank
     │   ├── benchmark/                  # măsurătorile (urmează)
     │   ├── choreography/               # Saga cu coreografie (urmează)
-    │   ├── common/                     # tipurile comune variantelor de transfer (urmează)
-    │   ├── config/                     # DataSource, JPA și Flyway pentru fiecare bancă
-    │   ├── naive/                      # varianta naivă (urmează)
-    │   ├── orchestration/              # Saga cu orchestrare (urmează)
+    │   ├── common/                     # contractele comune variantelor de transfer
+    │   ├── config/                     # DataSource, JPA, Flyway, servicii simulate
+        │   ├── orchestration/              # Saga cu orchestrare (urmează)
+│   ├── plain/                      # V1 Plain-Correct (urmează)
     │   ├── twophase/                   # Two-phase commit (urmează)
     │   └── web/                        # controller-ele REST
     └── resources/

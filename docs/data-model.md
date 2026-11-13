@@ -24,12 +24,29 @@ Migrații: `V1` schema, `V2` date inițiale (100 de conturi cu câte 1000 lei î
 
 | Clasă | Rol |
 |---|---|
-| `AlphaBankOperations`, `BetaBankOperations` | `debit`, `credit`, `refund`, `balanceOf`, fiecare într-o tranzacție locală a băncii lui. Interfața comună este `BankOperations`. |
+| `AlphaBankOperations`, `BetaBankOperations` | `debit`, `credit`, `refund`, `balanceOf` și operațiile pe rândul din `transfer` (mai jos), fiecare într-o tranzacție locală a băncii lui. Interfața comună este `BankOperations`. |
+| `Banks` | `banks.of(Bank.ALPHA)` întoarce `BankOperations` al băncii, ca variantele să nu aleagă cu `if`. |
 | `AlphaBankTransfer`, `BetaBankTransfer` + repository-uri | Entitățile tabelului `transfer` (`findByIdempotencyKey`, `findByStatus`). |
 | `LedgerService` | `getTotalMoney()`, `getInFlightMoney()`, `resetData()`, `inconsistencyWindowsMillis()` |
 | `InvariantChecker` | Verifică regulile 1–3 din `docs/contracts.md`; întoarce un `InvariantReport` |
 
 Debit-ul este un singur `UPDATE ... WHERE balance >= :amount`, deci verificarea și modificarea sunt atomice. Un debit peste sold aruncă `InsufficientFundsException`, iar un cont inexistent `AccountNotFoundException`. Nu se citește soldul în aplicație ca să se modifice apoi, pentru că sub concurență s-ar pierde modificări.
+
+## Operații pe transfer (comune tuturor variantelor)
+
+Variantele nu scriu SQL pe `transfer`; folosesc metodele din `BankOperations`, care respectă convențiile de mai sus.
+
+| Metodă | Banca | Ce face |
+|---|---|---|
+| `debitAndRecordPending(request)` | sursă | Inserează rândul `PENDING` și debitează, în aceeași tranzacție. Întoarce `id`-ul. `InsufficientFundsException` sau `DuplicateTransferException` (cheia există deja) și nu se scrie nimic. |
+| `creditOnce(request)` | destinație | Inserează rândul cu aceeași cheie și creditează. `false` dacă cheia a fost deja creditată (idempotent). |
+| `markCompleted(id)` | sursă | `PENDING` → `COMPLETED`, setează `finalized_at`. `false` dacă nu mai era `PENDING`. |
+| `compensate(id, reason)` | sursă | Refund + `PENDING` → `COMPENSATED` + `finalized_at`, în aceeași tranzacție. `false` dacă nu mai era `PENDING`, deci refund-ul nu se face de două ori. |
+| `recordAttempt(id, reason)` | sursă | `attempt_count + 1` și `failure_reason`, pentru retry. |
+| `findTransfer(id)`, `findTransfer(key)` | oricare | Rândul ca `TransferRecord`. |
+| `findPendingOlderThan(age)` | sursă | Pentru jobul de recuperare. |
+
+`markCompleted` și `compensate` modifică doar un rând `PENDING`, așa că un transfer care e finalizat în același timp de fluxul normal și de recuperare ajunge într-o singură stare terminală.
 
 ## Rulare
 
