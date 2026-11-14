@@ -2,6 +2,7 @@ package ro.saga.transfer.plain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ro.saga.transfer.bank.BankOperations;
@@ -39,6 +40,7 @@ public class PlainTransferService implements TransferService {
     private final int maxCompensationAttempts;
     private final long compensationBackoffMs;
 
+    @Autowired
     public PlainTransferService(
             Banks banks,
             FaultInjector faults,

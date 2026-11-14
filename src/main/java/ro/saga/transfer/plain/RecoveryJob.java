@@ -45,6 +45,10 @@ public class RecoveryJob {
     }
 
     public int recoverPendingTransfers() {
+        return recoverPendingTransfers(Duration.ofMillis(staleAfterMs));
+    }
+
+    public int recoverPendingTransfers(Duration age) {
         int recovered = 0;
         for (Bank sourceBank : Bank.values()) {
             Bank targetBank = (sourceBank == Bank.ALPHA) ? Bank.BETA : Bank.ALPHA;
@@ -53,7 +57,7 @@ public class RecoveryJob {
 
             List<TransferRecord> stalePending;
             try {
-                stalePending = source.findPendingOlderThan(Duration.ofMillis(staleAfterMs));
+                stalePending = source.findPendingOlderThan(age);
             } catch (Exception e) {
                 log.error("RecoveryJob: failed to query stale pending transfers for {}: {}", sourceBank, e.getMessage());
                 continue;
