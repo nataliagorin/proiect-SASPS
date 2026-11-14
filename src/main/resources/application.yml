@@ -37,6 +37,9 @@ app:
     interval-ms: 1000
     stale-after-ms: 5000
 
+  web:
+    variant: V1
+
 management:
   endpoints:
     web:
