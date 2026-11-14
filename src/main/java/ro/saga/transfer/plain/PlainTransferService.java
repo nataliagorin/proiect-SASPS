@@ -133,19 +133,36 @@ public class PlainTransferService implements TransferService {
     }
 
     private TransferResult handleDuplicate(BankOperations source, String idempotencyKey) {
-        Optional<TransferRecord> existing = source.findTransfer(idempotencyKey);
-        if (existing.isEmpty()) {
-            return TransferResult.failedBeforeDebit("Duplicate transfer detected but record not found");
+        // If another thread is actively completing this transfer, wait briefly for it to reach terminal state
+        for (int i = 0; i < 20; i++) {
+            Optional<TransferRecord> existing = source.findTransfer(idempotencyKey);
+            if (existing.isEmpty()) {
+                return TransferResult.failedBeforeDebit("Duplicate transfer detected but record not found");
+            }
+            TransferRecord record = existing.get();
+            if (record.status() != TransferStatus.PENDING) {
+                return switch (record.status()) {
+                    case COMPLETED -> TransferResult.completed(record.id());
+                    case COMPENSATED -> FRAUD_REJECTED.equals(record.failureReason())
+                            ? TransferResult.rejectedFraud(record.id())
+                            : TransferResult.compensated(record.id(), record.failureReason() != null ? record.failureReason() : "Compensated");
+                    case FAILED -> TransferResult.failedBeforeDebit(record.failureReason() != null ? record.failureReason() : "Transfer failed");
+                    case PENDING -> throw new IllegalStateException("Unreachable");
+                };
+            }
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
-        TransferRecord record = existing.get();
-        return switch (record.status()) {
-            case COMPLETED -> TransferResult.completed(record.id());
-            case COMPENSATED -> FRAUD_REJECTED.equals(record.failureReason())
-                    ? TransferResult.rejectedFraud(record.id())
-                    : TransferResult.compensated(record.id(), record.failureReason() != null ? record.failureReason() : "Compensated");
-            case PENDING -> TransferResult.awaitingRecovery(record.id(), "Transfer still pending");
-            case FAILED -> TransferResult.failedBeforeDebit(record.failureReason() != null ? record.failureReason() : "Transfer failed");
-        };
+
+        return source.findTransfer(idempotencyKey)
+                .map(r -> r.status() == TransferStatus.COMPLETED
+                        ? TransferResult.completed(r.id())
+                        : TransferResult.awaitingRecovery(r.id(), "Transfer still pending"))
+                .orElseGet(() -> TransferResult.failedBeforeDebit("Duplicate transfer detected but record not found"));
     }
 
     private TransferResult compensateWithRetry(BankOperations source, long transferId, String reason) {
