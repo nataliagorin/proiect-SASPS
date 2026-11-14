@@ -11,7 +11,7 @@ import ro.saga.transfer.config.BetaBankDataSourceConfig;
  * Starts the two bank databases once for all tests that extend it. They are stopped when the JVM exits.
  */
 @SpringBootTest
-abstract class AbstractBankIntegrationTest {
+public abstract class AbstractBankIntegrationTest {
 
     private static final String POSTGRES_IMAGE = "postgres:17";
 

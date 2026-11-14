@@ -135,6 +135,9 @@ sequenceDiagram
 | `SimulatedFraudCheckService` | `fraud` | Respinge peste `app.fraud.max-amount` sau din `app.fraud.blocked-accounts`; latență `app.fraud.latency-ms`; timeout prin `FRAUD_TIMEOUT`. |
 | `SimulatedAuditService` | `audit` | Pică la `AUDIT_FAILURE`, altfel numără înregistrările. |
 | `TransferMetrics` | `observability` | Învelește orice `TransferService` cu timer-ul `transfer.duration` (etichete `variant`, `outcome`). |
+| `PlainTransferService` | `plain` | Implementarea baseline V1 a `TransferService`: flux procedural în 5 pași, verificare antifraudă, credit idempotent, compensare cu backoff. |
+| `RecoveryJob` | `plain` | Job `@Scheduled` pentru reconcilierea transferurilor `PENDING` vechi pe baza existenței creditului în destinație. |
+| `TransferController` | `web` | Expune `POST /transfers` și `GET /transfers/{idempotencyKey}`, învelind execuția cu `TransferMetrics`. |
 
 ## Decizii
 
@@ -150,4 +153,4 @@ sequenceDiagram
 
 ## Ce urmează
 
-Variantele de transfer (V1 Plain-Correct, Saga cu orchestrare, Saga cu coreografie, 2PC) vor fi adăugate în pachetele `plain`, `orchestration`, `choreography` și `twophase`, ca implementări ale `TransferService` din `common`. Pentru anti-pattern-ul shared database va fi adăugat un al treilea container PostgreSQL.
+Varianta V1 Plain-Correct este complet implementată în pachetul `plain` și acoperită de teste de integrare, concurență și anduranță. Urmează variantele cu design patterns pentru M2 și M3 (Saga cu orchestrare în `orchestration`, Saga cu coreografie în `choreography`, 2PC în `twophase` și Workflow Temporal). Pentru anti-pattern-ul shared database va fi adăugat un al treilea container PostgreSQL.
