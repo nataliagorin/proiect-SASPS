@@ -57,4 +57,13 @@ class RawDataWriterTest {
                 "0,200000.00,0",
                 "100,199950.00,50.00");
     }
+
+    @Test
+    void writesTheInconsistencyWindows() throws IOException {
+        RawDataWriter writer = new RawDataWriter(directory.resolve("raw"));
+
+        writer.writeWindows("run-1", List.of(12.0, 3.4567));
+
+        assertThat(Files.readAllLines(writer.windowsFile("run-1"))).containsExactly("window_ms", "12.000", "3.457");
+    }
 }

@@ -87,9 +87,10 @@ class BenchmarkCampaignIntegrationTest extends AbstractBankIntegrationTest {
             String runId = cell(cells, "run_id");
             assertThat(Files.readAllLines(output.resolve("raw/" + runId + ".csv"))).hasSize(121);
             assertThat(Files.readAllLines(output.resolve("raw/" + runId + "-inflight.csv"))).hasSizeGreaterThan(1);
+            assertThat(Files.readAllLines(output.resolve("raw/" + runId + "-windows.csv"))).hasSizeGreaterThan(1);
         }
         try (Stream<Path> raw = Files.list(output.resolve("raw"))) {
-            assertThat(raw.count()).isEqualTo(8);
+            assertThat(raw.count()).isEqualTo(12);
         }
         assertThat(Files.readString(output.resolve("environment.json"))).contains("\"git_sha\": \"test-sha\"");
     }

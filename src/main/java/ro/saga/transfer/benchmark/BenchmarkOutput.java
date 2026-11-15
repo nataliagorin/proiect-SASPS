@@ -14,6 +14,7 @@ import java.nio.file.Path;
  *   environment.json            machine, JVM, git SHA
  *   raw/&lt;run_id&gt;.csv           latency of every transfer
  *   raw/&lt;run_id&gt;-inflight.csv  money-in-flight samples
+ *   raw/&lt;run_id&gt;-windows.csv   inconsistency window of every finalized transfer
  * </pre>
  */
 @Component
@@ -54,6 +55,7 @@ public class BenchmarkOutput {
     public RunResult record(RunMeasurement measurement) {
         raw.writeLatencies(measurement.runId(), measurement.load());
         raw.writeInFlight(measurement.runId(), measurement.samples());
+        raw.writeWindows(measurement.runId(), measurement.inconsistencyWindowsMs());
         RunResult result = RunResult.from(measurement, properties.gitSha());
         csv.append(result);
         return result;

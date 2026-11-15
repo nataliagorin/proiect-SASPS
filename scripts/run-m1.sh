@@ -5,6 +5,7 @@
 #   scripts/run-m1.sh --quick            1000 transfers, 1 repetition: checks the pipeline in a few minutes
 #   scripts/run-m1.sh --scenarios "baseline sampling"   only some scenarios
 #   scripts/run-m1.sh --skip-build       reuse target/saga-transfer-*.jar
+#   scripts/run-m1.sh --skip-plots       no charts (no Python needed)
 #
 # Scenarios: baseline, fraud, pool, contention, sampling. Each runs in its own JVM; the pool size can only be set
 # at startup, so the pool scenario starts one JVM per size. A previous results/ is moved to results.<timestamp>/.
@@ -19,6 +20,7 @@ ALL_SCENARIOS="baseline fraud pool contention sampling"
 SCENARIOS="$ALL_SCENARIOS"
 QUICK=false
 SKIP_BUILD=false
+SKIP_PLOTS=false
 RESULTS_DIR=results
 HEAP="${BENCHMARK_HEAP:-2g}"
 
@@ -27,7 +29,8 @@ while [[ $# -gt 0 ]]; do
         --quick) QUICK=true ;;
         --skip-build) SKIP_BUILD=true ;;
         --scenarios) SCENARIOS="$2"; shift ;;
-        -h|--help) sed -n '2,13p' "$0"; exit 0 ;;
+        --skip-plots) SKIP_PLOTS=true ;;
+        -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
         *) echo "Unknown option: $1 (see --help)" >&2; exit 2 ;;
     esac
     shift
@@ -142,10 +145,22 @@ for scenario in $SCENARIOS; do
     esac
 done
 
+# --- Charts --------------------------------------------------------------------------------------------------------
+
+if ! $SKIP_PLOTS && [[ -f "$RESULTS_DIR/runs.csv" ]]; then
+    log "Charts G1-G4 and summary.md"
+    if [[ ! -x .venv/bin/python ]]; then
+        python3 -m venv .venv
+    fi
+    .venv/bin/pip install -q -r analysis/requirements.txt
+    .venv/bin/python analysis/plot_m1.py --results "$RESULTS_DIR" || FAILED=1
+fi
+
 log "Results"
 echo "CSV:          $RESULTS_DIR/runs.csv ($(($(wc -l < "$RESULTS_DIR/runs.csv") - 1)) runs)"
 echo "Raw data:     $RESULTS_DIR/raw/"
 echo "Environment:  $RESULTS_DIR/environment.json"
+$SKIP_PLOTS || echo "Charts:       $RESULTS_DIR/plots/ (table view: $RESULTS_DIR/summary.md)"
 
 if [[ "$FAILED" -ne 0 ]]; then
     echo "At least one run broke the acceptance gate or failed; check the logs above." >&2
