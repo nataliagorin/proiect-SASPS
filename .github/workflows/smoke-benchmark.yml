@@ -1,6 +1,8 @@
 name: Smoke benchmark
 
 # Manual only: the benchmark never runs on push or in the regular build.
+# A small matrix that checks the whole pipeline (runner, CSV, charts, graphs); real numbers come from
+# scripts/run-m1.sh on a quiet laptop, not from a shared CI runner.
 on:
   workflow_dispatch:
     inputs:
@@ -23,24 +25,50 @@ jobs:
           java-version: '25'
           cache: maven
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: analysis/requirements.txt
+
+      - name: Install Graphviz
+        run: sudo apt-get install -y graphviz
+
       - name: Start bank databases
         run: docker compose up -d --wait
 
       - name: Build
         run: ./mvnw -B -DskipTests package
 
-      # Until BenchmarkRunner exists this only checks that the benchmark profile starts and stops.
-      - name: Run benchmark profile
+      # Exits 1 if any run loses money or leaves transfers PENDING.
+      - name: Run benchmark
         run: >
-          java -jar target/saga-transfer-*.jar
+          java -Xms1g -Xmx1g -jar target/saga-transfer-*.jar
           --spring.profiles.active=benchmark
           --app.benchmark.transfers=${{ inputs.transfers }}
+          --app.benchmark.warmup-transfers=50
+          --app.benchmark.failure-rates=0.0,0.1,0.3
+          --app.benchmark.threads=1,4,8
           --app.benchmark.repetitions=1
+          --app.benchmark.git-sha=$(git rev-parse --short HEAD)
+          --app.benchmark.docker-version=$(docker version --format '{{.Server.Version}}')
+
+      - name: Charts and summary
+        run: |
+          pip install -r analysis/requirements.txt
+          python analysis/plot_m1.py --results results
+          cat results/summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Class graphs
+        run: analysis/deps.sh plain
 
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: smoke-benchmark-results
-          path: results/
+          path: |
+            results/
+            analysis/graphs/
           if-no-files-found: ignore

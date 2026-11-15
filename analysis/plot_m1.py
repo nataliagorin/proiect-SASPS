@@ -327,12 +327,13 @@ def summary_table(runs: pd.DataFrame, results: Path) -> str:
         f"Runs: {len(runs)} · passed the acceptance gate: {int(runs['gate_ok'].sum())} · "
         f"git: {', '.join(sorted(runs['git_sha'].astype(str).unique()))}",
         "",
-        "Latency and window percentiles are computed on the merged raw values of all repetitions. Throughput is the "
-        "mean ± 95% CI across repetitions.",
+        "Latency and window percentiles are computed on the merged raw values of all repetitions; \"latency p95 per "
+        "run\" is the mean ± standard deviation of the per-run p95, reported separately as docs/experiments.md asks. "
+        "Throughput is the mean ± 95% CI across repetitions.",
         "",
         "| scenario | failure | threads | pool | reps | completed | compensated | technical | window mean ms "
-        "| window p95 ms | latency p50 ms | latency p95 ms | latency p99 ms | throughput tps |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "| window p95 ms | latency p50 ms | latency p95 ms | latency p95 per run ms | latency p99 ms | throughput tps |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     ok = runs[runs["gate_ok"]]
     keys = ["scenario", "failure_rate", "threads", "pool_size"]
@@ -343,12 +344,15 @@ def summary_table(runs: pd.DataFrame, results: Path) -> str:
                       else group["inflight_p95_ms"].mean())
         transfers = group["transfers"].sum()
         throughput, half = mean_ci(group["throughput_tps"])
+        p95_runs = group["latency_p95_ms"]
+        p95_sd = p95_runs.std(ddof=1) if len(p95_runs) > 1 else 0.0
         lines.append(
             f"| {scenario} | {percent(rate)} | {threads} | {pool} | {len(group)} "
             f"| {group['completed'].sum() / transfers:.1%} | {group['compensated'].sum() / transfers:.1%} "
             f"| {int(group['failed_technical'].sum())} | {group['inflight_mean_ms'].mean():.1f} | {window_p95:.1f} "
             f"| {merged_percentile(latencies, 50):.1f} | {merged_percentile(latencies, 95):.1f} "
-            f"| {merged_percentile(latencies, 99):.1f} | {throughput:.0f} ± {half:.0f} |")
+            f"| {p95_runs.mean():.1f} ± {p95_sd:.1f} | {merged_percentile(latencies, 99):.1f} "
+            f"| {throughput:.0f} ± {half:.0f} |")
     failed = runs[~runs["gate_ok"]]
     lines += ["", "## Runs excluded by the acceptance gate", ""]
     if failed.empty:

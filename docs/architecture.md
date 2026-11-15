@@ -138,6 +138,11 @@ sequenceDiagram
 | `PlainTransferService` | `plain` | Implementarea baseline V1 a `TransferService`: flux procedural în 5 pași, verificare antifraudă, credit idempotent, compensare cu backoff. |
 | `RecoveryJob` | `plain` | Job `@Scheduled` pentru reconcilierea transferurilor `PENDING` vechi pe baza existenței creditului în destinație. |
 | `TransferController` | `web` | Expune `POST /transfers` și `GET /transfers/{idempotencyKey}`, învelind execuția cu `TransferMetrics`. |
+| `BenchmarkRunner`, `BenchmarkCampaign` | `benchmark` | Doar cu profilul `benchmark`: rulează matricea din `app.benchmark.*`, apoi oprește aplicația; cod de ieșire 1 dacă o rulare pică poarta I1–I3. |
+| `BenchmarkEngine` | `benchmark` | O rulare: configurează erorile, `resetData()`, warmup, quiescence, încă un reset, sarcina măsurată cu eșantionare, quiescence, invarianți. |
+| `WorkloadGenerator`, `LoadExecutor` | `benchmark` | Transferurile fiecărui thread, generate înainte de cronometru din seed, repetare și thread (uniform sau Zipf); thread-uri `benchmark-N` pornite simultan, cronometrate cu `System.nanoTime()`. |
+| `InFlightSampler`, `QuiescenceAwaiter` | `benchmark` | Banii în zbor la interval fix; așteptarea până nu mai e niciun `PENDING`. |
+| `BenchmarkOutput`, `CsvResultWriter`, `RawDataWriter`, `EnvironmentReport` | `benchmark` | `results/runs.csv`, `results/raw/`, `results/environment.json`. |
 
 ## Decizii
 
@@ -153,4 +158,4 @@ sequenceDiagram
 
 ## Ce urmează
 
-Varianta V1 Plain-Correct este complet implementată în pachetul `plain` și acoperită de teste de integrare, concurență și anduranță. Urmează variantele cu design patterns pentru M2 și M3 (Saga cu orchestrare în `orchestration`, Saga cu coreografie în `choreography`, 2PC în `twophase` și Workflow Temporal). Pentru anti-pattern-ul shared database va fi adăugat un al treilea container PostgreSQL.
+Varianta V1 Plain-Correct este complet implementată în pachetul `plain` și acoperită de teste de integrare, concurență și anduranță. Benchmark-ul (pachetul `benchmark`, `scripts/run-m1.sh`, `analysis/`) măsoară orice bean `TransferService` după nume, deci o variantă nouă intră în comparație adăugând-o în `app.benchmark.variants`. Urmează variantele cu design patterns pentru M2 și M3 (Saga cu orchestrare în `orchestration`, Saga cu coreografie în `choreography`, 2PC în `twophase` și Workflow Temporal). Pentru anti-pattern-ul shared database va fi adăugat un al treilea container PostgreSQL.
