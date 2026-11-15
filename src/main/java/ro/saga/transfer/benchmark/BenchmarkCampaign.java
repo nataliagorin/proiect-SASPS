@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
-/** Runs the whole matrix from {@code app.benchmark.*}, one run after the other. */
+/** Runs the whole matrix from {@code app.benchmark.*}, one run after the other, and records every run. */
 @Component
 @Profile("benchmark")
 public class BenchmarkCampaign {
@@ -25,14 +25,17 @@ public class BenchmarkCampaign {
     private static final DateTimeFormatter CAMPAIGN_ID = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 
     private final BenchmarkEngine engine;
+    private final BenchmarkOutput output;
     private final BenchmarkProperties properties;
     private final int poolSize;
 
     public BenchmarkCampaign(
             BenchmarkEngine engine,
+            BenchmarkOutput output,
             BenchmarkProperties properties,
             @Value("${app.datasource.alpha-bank.hikari.maximum-pool-size:10}") int poolSize) {
         this.engine = engine;
+        this.output = output;
         this.properties = properties;
         this.poolSize = poolSize;
     }
@@ -40,12 +43,15 @@ public class BenchmarkCampaign {
     public Summary run() {
         List<RunConfig> runs = BenchmarkMatrix.expand(properties, poolSize);
         String campaignId = LocalDateTime.now().format(CAMPAIGN_ID);
-        log.info("Benchmark {}: {} runs, {} measured transfers each", campaignId, runs.size(), properties.transfers());
+        log.info("Benchmark {}: {} runs, {} measured transfers each, output in {}", campaignId, runs.size(),
+                properties.transfers(), output.directory().toAbsolutePath());
+        output.writeEnvironment();
 
         int failed = 0;
         for (int i = 0; i < runs.size(); i++) {
             RunConfig config = runs.get(i);
             RunMeasurement measurement = engine.execute(config, config.runId(campaignId));
+            output.record(measurement);
             if (!measurement.passedGate()) {
                 failed++;
             }
