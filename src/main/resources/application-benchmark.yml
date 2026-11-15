@@ -1,5 +1,5 @@
 # Activated only with --spring.profiles.active=benchmark; never during the build or tests.
-# The run matrix (app.benchmark.*) is added by the benchmark.
+# The run matrix (app.benchmark.*) is described in docs/experiments.md; scripts/run-m1.sh overrides it per scenario.
 spring:
   main:
     web-application-type: none
@@ -13,7 +13,27 @@ app:
       hikari:
         maximum-pool-size: 10
 
+  benchmark:
+    variants: [V1]
+    scenario: baseline
+    transfers: 10000
+    warmup-transfers: 200
+    failure-rates: [0.0, 0.05, 0.1, 0.2, 0.3]
+    threads: [1, 2, 4, 8, 16]
+    repetitions: 3
+    seed: 42
+    output-dir: results
+    # uniform: accounts 1-100; zipf: only accounts 1..hot-accounts, Zipf-weighted (contention scenario)
+    distribution: uniform
+    hot-accounts: 10
+    zipf-exponent: 1.0
+    min-amount: 1
+    max-amount: 50
+    sample-interval-ms: 100
+
 logging:
   level:
     root: WARN
     ro.saga.transfer: INFO
+    # Per-retry warnings of the variants would cost time inside the measured calls; errors are still logged.
+    ro.saga.transfer.plain: ERROR
