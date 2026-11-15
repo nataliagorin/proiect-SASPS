@@ -115,6 +115,57 @@ docker exec saga-alpha-bank psql -U saga -d alpha_bank -c "select version, descr
 docker exec saga-beta-bank psql -U saga -d beta_bank -c "select version, description, success from flyway_schema_history"
 ```
 
+## Executare transferuri (REST API)
+
+Aplicația expune endpoint-uri REST pentru crearea și interogarea transferurilor (folosind varianta activă din `app.web.variant`, implicit `V1`):
+
+1. **Inițierea unui transfer între bănci:**
+
+   ```bash
+   curl -i -X POST http://localhost:8080/transfers \
+     -H "Content-Type: application/json" \
+     -H "Idempotency-Key: tx-1001" \
+     -d '{"fromBank":"ALPHA","fromAccountId":1,"toBank":"BETA","toAccountId":2,"amount":100.00}'
+   ```
+
+   Pe Windows (PowerShell):
+
+   ```powershell
+   Invoke-RestMethod -Uri http://localhost:8080/transfers -Method POST `
+     -Headers @{ "Idempotency-Key" = "tx-1001" } `
+     -ContentType "application/json" `
+     -Body '{"fromBank":"ALPHA","fromAccountId":1,"toBank":"BETA","toAccountId":2,"amount":100.00}'
+   ```
+
+   Răspuns așteptat (HTTP 200 OK):
+
+   ```json
+   {"transferId":1,"outcome":"COMPLETED","status":"COMPLETED","message":"Transfer completed"}
+   ```
+
+2. **Interogarea stării unui transfer după cheia unică de idempotență:**
+
+   ```bash
+   curl http://localhost:8080/transfers/tx-1001
+   ```
+
+   Răspuns așteptat (HTTP 200 OK):
+
+   ```json
+   {
+     "id": 1,
+     "idempotencyKey": "tx-1001",
+     "fromAccount": 1,
+     "toAccount": 2,
+     "amount": 100.00,
+     "status": "COMPLETED",
+     "createdAt": "2026-11-14T12:00:00Z",
+     "finalizedAt": "2026-11-14T12:00:00.050Z",
+     "failureReason": null,
+     "attemptCount": 0
+   }
+   ```
+
 ## Erori simulate
 
 Implicit nu pică nimic. Erorile din cod se pornesc din proprietăți, de exemplu:

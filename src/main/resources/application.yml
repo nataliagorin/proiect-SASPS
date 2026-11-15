@@ -28,6 +28,18 @@ app:
     latency-ms: 0
     blocked-accounts: []
 
+  compensation:
+    max-attempts: 3
+    backoff-ms: 50
+
+  recovery:
+    enabled: true
+    interval-ms: 1000
+    stale-after-ms: 5000
+
+  web:
+    variant: V1
+
 management:
   endpoints:
     web:
