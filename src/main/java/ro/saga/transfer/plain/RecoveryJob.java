@@ -14,10 +14,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Periodically reconciles stale PENDING transfers across both banks.
- * Can be disabled via app.recovery.enabled=false in crash tests and triggered manually.
- */
 @Component
 public class RecoveryJob {
 

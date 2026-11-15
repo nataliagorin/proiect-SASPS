@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-/** Outcome and status pairs from the table in docs/contracts.md. */
 class TransferResultTest {
 
     private static void assertResult(TransferResult result, Long id, TransferOutcome outcome, TransferStatus status) {

@@ -15,11 +15,6 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Demonstrates the hazard of uncoordinated distributed transfers without Saga or compensation.
- * Used for presentation slides to document the motivation of the project.
- * Not part of the benchmark suite.
- */
 class NoCoordinationDemoTest extends AbstractBankIntegrationTest {
 
     private static final BigDecimal AMOUNT = new BigDecimal("100.00");

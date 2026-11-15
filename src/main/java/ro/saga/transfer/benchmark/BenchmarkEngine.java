@@ -23,11 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Executes one run of the matrix against a {@link TransferService}, following the protocol in
- * docs/experiments.md: configure faults, reset, warmup, wait, reset, measured load with sampling, wait for
- * quiescence, check the invariants.
- */
 @Component
 @Profile("benchmark")
 public class BenchmarkEngine {

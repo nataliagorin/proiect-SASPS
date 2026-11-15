@@ -9,12 +9,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Raw data for the analysis, in {@code <output>/raw/}: every transfer's latency ({@code <run_id>.csv}), the
- * money-in-flight samples ({@code <run_id>-inflight.csv}) and every inconsistency window
- * ({@code <run_id>-windows.csv}). Percentiles across repetitions are computed from these files, not by averaging the
- * per-run percentiles.
- */
 public final class RawDataWriter {
 
     private final Path directory;
@@ -35,7 +29,6 @@ public final class RawDataWriter {
         return directory.resolve(runId + "-windows.csv");
     }
 
-    /** Column: window_ms ({@code finalized_at - created_at} of every finalized transfer). */
     public void writeWindows(String runId, List<Double> windowsMs) {
         write(windowsFile(runId), out -> {
             out.write("window_ms\n");
@@ -45,7 +38,6 @@ public final class RawDataWriter {
         });
     }
 
-    /** Columns: thread, sequence, outcome, latency_ms. */
     public void writeLatencies(String runId, LoadExecutor.LoadResult load) {
         write(latencyFile(runId), out -> {
             out.write("thread,sequence,outcome,latency_ms\n");
@@ -59,7 +51,6 @@ public final class RawDataWriter {
         });
     }
 
-    /** Columns: elapsed_ms, total_money, inflight_money. */
     public void writeInFlight(String runId, List<InFlightSampler.Sample> samples) {
         write(inFlightFile(runId), out -> {
             out.write("elapsed_ms,total_money,inflight_money\n");

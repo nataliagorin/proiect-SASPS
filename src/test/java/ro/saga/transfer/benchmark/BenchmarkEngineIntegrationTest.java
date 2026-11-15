@@ -24,10 +24,6 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
-/**
- * Runs the engine against V1 and the real bank databases. A short recovery period keeps the quiescence wait short;
- * the context is closed afterwards so its RecoveryJob cannot touch the rows of later tests.
- */
 @TestPropertySource(properties = {"app.recovery.stale-after-ms=1000", "app.recovery.interval-ms=200"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class BenchmarkEngineIntegrationTest extends AbstractBankIntegrationTest {

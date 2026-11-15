@@ -24,9 +24,6 @@ import ro.saga.transfer.common.TransferStatus;
 
 import java.util.Optional;
 
-/**
- * V1 Plain-Correct baseline: executes the entire 5-step transfer procedurally without design patterns.
- */
 @Service("V1")
 public class PlainTransferService implements TransferService {
 

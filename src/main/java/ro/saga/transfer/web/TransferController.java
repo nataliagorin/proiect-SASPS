@@ -24,9 +24,6 @@ import ro.saga.transfer.observability.TransferMetrics;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * REST controller for executing transfers and querying by idempotency key.
- */
 @RestController
 @RequestMapping("/transfers")
 public class TransferController {

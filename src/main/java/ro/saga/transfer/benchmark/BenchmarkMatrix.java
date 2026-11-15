@@ -3,7 +3,6 @@ package ro.saga.transfer.benchmark;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Expands {@code app.benchmark.*} into the ordered list of runs: variant x failure rate x threads x repetition. */
 public final class BenchmarkMatrix {
 
     private BenchmarkMatrix() {

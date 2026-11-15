@@ -12,25 +12,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Closed-loop load: one platform thread per workload list, all released together, each timing every call with
- * {@link System#nanoTime()} into its own preallocated array.
- * <p>
- * Threads are named {@code benchmark-0}, {@code benchmark-1}, ...: the fault injector seeds each thread from its
- * name, so fixed names make the injected faults repeat from one run to the next.
- */
 public final class LoadExecutor {
 
     public static final String THREAD_PREFIX = "benchmark-";
 
     private static final Logger log = LoggerFactory.getLogger(LoadExecutor.class);
 
-    /**
-     * @param latenciesNanos per thread, per transfer
-     * @param outcomes       per thread, per transfer; {@code FAILED_TECHNICAL} when the service threw
-     * @param exceptions     calls that threw instead of returning a result (a contract violation, logged)
-     * @param durationNanos  from the release of the threads until the last one finished
-     */
     public record LoadResult(long[][] latenciesNanos, TransferOutcome[][] outcomes, int exceptions, long durationNanos) {
 
         public int transfers() {

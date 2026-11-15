@@ -7,10 +7,6 @@ import ro.saga.transfer.common.FaultPoint;
 
 import java.util.Random;
 
-/**
- * Fails with the configured probability. Each thread draws from its own {@link Random}, seeded from the seed and the
- * thread name, so a run with the same seed and thread names fails at the same places.
- */
 @Component
 public class SimulatedFaultInjector implements FaultInjector {
 
@@ -28,7 +24,6 @@ public class SimulatedFaultInjector implements FaultInjector {
         return properties;
     }
 
-    /** For the benchmark, between runs. Every thread restarts its sequence from the new seed. */
     public void reconfigure(FaultProperties properties) {
         this.properties = properties;
     }

@@ -10,10 +10,6 @@ import ro.saga.transfer.bank.AbstractBankIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Starts the real {@code benchmark} profile, so the Spring wiring of the benchmark beans and the binding of
- * application-benchmark.yml are checked. The runner is replaced, because the real one runs the matrix and exits.
- */
 @ActiveProfiles("benchmark")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class BenchmarkProfileWiringTest extends AbstractBankIntegrationTest {

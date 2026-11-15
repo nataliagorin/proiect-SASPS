@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 
 import java.math.BigDecimal;
 
-/** SQL shared by both banks. The balance check and the update are a single atomic statement. */
 final class AccountSql {
 
     private AccountSql() {

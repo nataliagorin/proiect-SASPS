@@ -14,7 +14,6 @@ import ro.saga.transfer.common.TransferStatus;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-/** Columns of the {@code transfer} table, shared by both banks. */
 @MappedSuperclass
 public abstract class AbstractBankTransfer {
 

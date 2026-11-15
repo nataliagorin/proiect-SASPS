@@ -8,7 +8,6 @@ import ro.saga.transfer.common.TransferOutcome;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/** Fails at {@link FaultPoint#AUDIT_FAILURE}; otherwise only counts the records. */
 @Service
 public class SimulatedAuditService implements AuditService {
 

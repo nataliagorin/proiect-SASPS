@@ -6,12 +6,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Everything measured in one run, before any statistics.
- *
- * @param inconsistencyWindowsMs {@code finalized_at - created_at} of every finalized transfer, after quiescence
- * @param pendingLeft            transfers still {@code PENDING} when the quiescence wait ended
- */
 public record RunMeasurement(
         RunConfig config,
         String runId,
@@ -23,7 +17,6 @@ public record RunMeasurement(
         List<Double> inconsistencyWindowsMs,
         long pendingLeft) {
 
-    /** Acceptance gate I1-I3 from docs/experiments.md. */
     public boolean passedGate() {
         return invariants.isConsistent() && pendingLeft == 0;
     }

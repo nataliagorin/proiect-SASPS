@@ -12,14 +12,8 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Appends one row per run to the benchmark CSV, flushing after every run so a crash keeps the finished runs.
- * Numbers always use a decimal point ({@link Locale#ROOT}); a Romanian default locale would write commas.
- * NaN (no values, e.g. no finalized transfer) is written as an empty cell.
- */
 public final class CsvResultWriter {
 
-    /** The schema of docs/contracts.md, frozen with the contracts. */
     public static final List<String> HEADER = List.of(
             "run_id", "git_sha", "timestamp", "variant", "scenario", "repetition", "seed", "failure_rate", "threads",
             "pool_size",
@@ -81,7 +75,6 @@ public final class CsvResultWriter {
         return value == null ? "" : value.toPlainString();
     }
 
-    /** RFC 4180 quoting, in case a label ever contains a comma or a quote. */
     private static String cell(String value) {
         if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
             return '"' + value.replace("\"", "\"\"") + '"';

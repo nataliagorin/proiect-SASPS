@@ -8,12 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
 
-/**
- * Builds the transfers of each benchmark thread before the clock starts.
- * <p>
- * The workload depends only on (seed, repetition, thread index), never on the variant, the failure rate or time,
- * so every variant gets exactly the same transfers and a run can be repeated (rule I6).
- */
 public final class WorkloadGenerator {
 
     private final AccountDistribution distribution;
@@ -34,7 +28,6 @@ public final class WorkloadGenerator {
         this.zipf = new ZipfSampler(hotAccounts, zipfExponent);
     }
 
-    /** Seed of one thread's generator; SplittableRandom mixes it further. */
     public static long threadSeed(long seed, int repetition, int threadIndex) {
         long mixed = seed;
         mixed = mixed * 0x9E3779B97F4A7C15L + repetition;
@@ -42,7 +35,6 @@ public final class WorkloadGenerator {
         return mixed;
     }
 
-    /** How many transfers each of {@code threads} threads runs; the first ones take the remainder. */
     public static int[] split(int total, int threads) {
         int[] counts = new int[threads];
         for (int i = 0; i < threads; i++) {
@@ -51,7 +43,6 @@ public final class WorkloadGenerator {
         return counts;
     }
 
-    /** One list per thread, {@code total} transfers in all. Keys are {@code keyPrefix-thread-i}. */
     public List<List<TransferRequest>> generate(long seed, int repetition, int threads, int total, String keyPrefix) {
         int[] counts = split(total, threads);
         List<List<TransferRequest>> perThread = new ArrayList<>(threads);

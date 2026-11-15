@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Reads and resets the state of both banks. Used by the benchmark and the invariant checks. */
 @Service
 public class LedgerService {
 
@@ -43,7 +42,6 @@ public class LedgerService {
                 new TransactionTemplate(betaTransactions)));
     }
 
-    /** Sum of all balances in both banks. */
     public BigDecimal getTotalMoney() {
         BigDecimal total = BigDecimal.ZERO;
         for (BankAccess bank : banks.values()) {
@@ -54,10 +52,6 @@ public class LedgerService {
         return total;
     }
 
-    /**
-     * Money debited but not yet credited: amount of PENDING transfers whose key has no row in the other bank.
-     * Relies on the convention that only the source bank's row is ever PENDING.
-     */
     public BigDecimal getInFlightMoney() {
         BigDecimal inFlight = BigDecimal.ZERO;
         for (Bank source : Bank.values()) {
@@ -76,7 +70,6 @@ public class LedgerService {
         return inFlight;
     }
 
-    /** Empties {@code transfer} and sets every balance back to {@link #INITIAL_BALANCE}. */
     public void resetData() {
         for (BankAccess bank : banks.values()) {
             bank.transaction().executeWithoutResult(status -> {
@@ -96,10 +89,6 @@ public class LedgerService {
         return count("SELECT count(*) FROM transfer WHERE status = 'PENDING'");
     }
 
-    /**
-     * Time between {@code created_at} (debit committed) and {@code finalized_at} (final state) of every finalized
-     * transfer, in milliseconds. Only source rows are finalized.
-     */
     public List<Double> inconsistencyWindowsMillis() {
         List<Double> windows = new ArrayList<>();
         for (BankAccess bank : banks.values()) {

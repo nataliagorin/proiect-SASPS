@@ -7,9 +7,6 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 import ro.saga.transfer.config.AlphaBankDataSourceConfig;
 import ro.saga.transfer.config.BetaBankDataSourceConfig;
 
-/**
- * Starts the two bank databases once for all tests that extend it. They are stopped when the JVM exits.
- */
 @SpringBootTest
 public abstract class AbstractBankIntegrationTest {
 

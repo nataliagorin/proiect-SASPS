@@ -34,10 +34,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Validates criteria M1-P3-4 (concurrent idempotency) and M1-P3-6 ("V1 is perfect" endurance & stress).
- * Proves that PlainTransferService maintains all financial invariants (I1-I6) under high concurrency and fault injection.
- */
 @TestPropertySource(properties = "app.recovery.enabled=false")
 class V1EnduranceTest extends AbstractBankIntegrationTest {
 
@@ -65,10 +61,6 @@ class V1EnduranceTest extends AbstractBankIntegrationTest {
         beta = banks.of(Bank.BETA);
     }
 
-    /**
-     * M1-P3-4: 16 threads submitting the exact same idempotencyKey simultaneously.
-     * Guarantees that only one transfer executes debit and credit, while all callers receive consistent results.
-     */
     @Test
     void concurrentDuplicateTransfers_16Threads_movesMoneyExactlyOnce() throws Exception {
         PlainTransferService service = new PlainTransferService(
@@ -123,11 +115,6 @@ class V1EnduranceTest extends AbstractBankIntegrationTest {
         assertThat(report.pendingTransfers()).isZero();
     }
 
-    /**
-     * M1-P3-6: Criterion "V1 is correct" under stress and fault injection.
-     * Executes bidirectional concurrent transfers across 16 threads with injected failures,
-     * reconciles pending transfers, and asserts zero money lost, zero negative balances, and zero pending rows.
-     */
     @Test
     void v1IsCorrect_underHighLoadAndFaultInjection_preservesAllInvariants() throws Exception {
         int totalTransfers = Integer.getInteger("test.endurance.transfers", 1000);

@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** A tiny matrix end to end: V1 on the real databases, then the files the analysis reads. */
 @TestPropertySource(properties = {"app.recovery.stale-after-ms=1000", "app.recovery.interval-ms=200"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class BenchmarkCampaignIntegrationTest extends AbstractBankIntegrationTest {

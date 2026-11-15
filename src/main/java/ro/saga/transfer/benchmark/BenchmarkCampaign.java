@@ -12,12 +12,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
-/** Runs the whole matrix from {@code app.benchmark.*}, one run after the other, and records every run. */
 @Component
 @Profile("benchmark")
 public class BenchmarkCampaign {
 
-    /** Runs executed and runs that failed the acceptance gate I1-I3. */
     public record Summary(int runs, int failedRuns) {
     }
 

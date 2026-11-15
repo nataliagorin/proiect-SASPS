@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import ro.saga.transfer.common.TransferResult;
 import ro.saga.transfer.common.TransferService;
 
-/** Times every variant the same way, so no variant measures itself. */
 @Component
 public class TransferMetrics {
 
@@ -18,7 +17,6 @@ public class TransferMetrics {
         this.registry = registry;
     }
 
-    /** Records {@value #TIMER} tagged with {@code variant} and {@code outcome} ({@code EXCEPTION} if it threw). */
     public TransferService timed(String variant, TransferService delegate) {
         return request -> {
             Timer.Sample sample = Timer.start(registry);

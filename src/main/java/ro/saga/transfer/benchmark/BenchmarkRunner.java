@@ -6,10 +6,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-/**
- * Entry point of {@code --spring.profiles.active=benchmark}: runs the matrix, then shuts the application down.
- * Exits with 1 when any run broke the acceptance gate, so scripts and CI notice.
- */
 @Component
 @Profile("benchmark")
 public class BenchmarkRunner implements CommandLineRunner {

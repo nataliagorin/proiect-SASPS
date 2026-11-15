@@ -12,7 +12,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/** SQL on the {@code transfer} table, shared by both banks. Callers run it in a local transaction. */
 final class TransferSql {
 
     private record Debited(long fromAccount, BigDecimal amount) {

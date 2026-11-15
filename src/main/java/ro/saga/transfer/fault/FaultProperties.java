@@ -6,7 +6,6 @@ import ro.saga.transfer.common.FaultPoint;
 import java.util.EnumSet;
 import java.util.Set;
 
-/** {@code app.fault.*}. An empty {@code points} means every {@link FaultPoint}. */
 @ConfigurationProperties("app.fault")
 public record FaultProperties(long seed, double rate, Set<FaultPoint> points) {
 

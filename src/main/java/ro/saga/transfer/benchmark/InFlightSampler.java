@@ -13,13 +13,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-/**
- * Reads the total money and the money in flight at a fixed interval while a run is going (G4 and
- * {@code inflight_max_money}). The peak cannot be computed after the run, so it has to be sampled.
- */
 public final class InFlightSampler {
 
-    /** One reading; {@code elapsedMs} counts from {@link #start()}. */
     public record Sample(long elapsedMs, BigDecimal totalMoney, BigDecimal inFlightMoney) {
     }
 
@@ -49,7 +44,6 @@ public final class InFlightSampler {
         scheduler.scheduleAtFixedRate(this::sample, 0, interval.toMillis(), TimeUnit.MILLISECONDS);
     }
 
-    /** Stops sampling, takes a last reading and returns all readings in time order. */
     public List<Sample> stop() {
         if (scheduler == null) {
             throw new IllegalStateException("Sampler not started");
@@ -70,7 +64,6 @@ public final class InFlightSampler {
         }
     }
 
-    /** Largest money in flight among the samples; zero when there are none. */
     public static BigDecimal maxInFlight(List<Sample> samples) {
         return samples.stream().map(Sample::inFlightMoney).reduce(BigDecimal.ZERO, BigDecimal::max);
     }

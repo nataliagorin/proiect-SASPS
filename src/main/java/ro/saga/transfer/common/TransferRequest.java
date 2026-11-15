@@ -3,7 +3,6 @@ package ro.saga.transfer.common;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-/** The same {@code idempotencyKey} sent twice must have the effect of one request. */
 public record TransferRequest(
         String idempotencyKey,
         Bank fromBank,

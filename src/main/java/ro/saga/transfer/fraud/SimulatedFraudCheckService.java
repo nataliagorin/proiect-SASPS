@@ -8,7 +8,6 @@ import ro.saga.transfer.common.FraudCheckService;
 import ro.saga.transfer.common.FraudDecision;
 import ro.saga.transfer.common.TransferRequest;
 
-/** Deterministic rule plus configurable latency. Timeouts come from {@link FaultPoint#FRAUD_TIMEOUT}. */
 @Service
 public class SimulatedFraudCheckService implements FraudCheckService {
 
@@ -24,7 +23,6 @@ public class SimulatedFraudCheckService implements FraudCheckService {
         return properties;
     }
 
-    /** For the benchmark, between runs. */
     public void reconfigure(FraudProperties properties) {
         this.properties = properties;
     }

@@ -5,7 +5,6 @@ import ro.saga.transfer.common.TransferOutcome;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-/** One row of the benchmark CSV, with the columns of docs/contracts.md in the same order. Times in ms. */
 public record RunResult(
         String runId,
         String gitSha,

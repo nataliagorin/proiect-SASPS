@@ -2,7 +2,6 @@ package ro.saga.transfer.benchmark;
 
 import java.util.List;
 
-/** Small {@link BenchmarkProperties} for tests; defaults match application-benchmark.yml except the sizes. */
 final class TestProperties {
 
     List<String> variants = List.of("V1");

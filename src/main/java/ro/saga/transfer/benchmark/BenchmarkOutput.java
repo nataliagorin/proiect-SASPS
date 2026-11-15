@@ -6,17 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 
-/**
- * Everything a campaign writes under {@code app.benchmark.output-dir}:
- * <pre>
- * results/
- *   runs.csv                    one row per run (docs/contracts.md)
- *   environment.json            machine, JVM, git SHA
- *   raw/&lt;run_id&gt;.csv           latency of every transfer
- *   raw/&lt;run_id&gt;-inflight.csv  money-in-flight samples
- *   raw/&lt;run_id&gt;-windows.csv   inconsistency window of every finalized transfer
- * </pre>
- */
 @Component
 @Profile("benchmark")
 public class BenchmarkOutput {
@@ -46,12 +35,10 @@ public class BenchmarkOutput {
         return directory;
     }
 
-    /** At the start of a campaign. */
     public void writeEnvironment() {
         EnvironmentReport.write(directory.resolve(ENVIRONMENT_FILE), EnvironmentReport.collect(properties));
     }
 
-    /** After every run: raw files first, then the CSV row that points to them. */
     public RunResult record(RunMeasurement measurement) {
         raw.writeLatencies(measurement.runId(), measurement.load());
         raw.writeInFlight(measurement.runId(), measurement.samples());

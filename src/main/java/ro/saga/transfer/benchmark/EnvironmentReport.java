@@ -12,17 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * {@code environment.json}: the machine and JVM a campaign ran on, so results from different laptops are not
- * compared by mistake. The run script passes the git SHA and the Docker version. Every benchmark JVM of a campaign
- * rewrites it with the same values.
- */
 public final class EnvironmentReport {
 
     private EnvironmentReport() {
     }
 
-    /** Machine-level facts only; per-run settings (scenario, pool size, ...) are columns of the CSV. */
     public static Map<String, Object> collect(BenchmarkProperties properties) {
         Runtime runtime = Runtime.getRuntime();
         Map<String, Object> values = new LinkedHashMap<>();
