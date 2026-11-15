@@ -19,10 +19,10 @@ class EnvironmentReportTest {
 
     @Test
     void collectsMachineJvmAndRunDetails() {
-        Map<String, Object> values = EnvironmentReport.collect(new TestProperties().build(), 10);
+        Map<String, Object> values = EnvironmentReport.collect(new TestProperties().build());
 
         assertThat(values).containsKeys("date", "git_sha", "os", "cpu", "cores", "ram_bytes", "jvm", "jvm_flags",
-                "max_heap_bytes", "docker", "pool_size", "scenario", "transfers", "seed");
+                "max_heap_bytes", "docker");
         assertThat(values.get("git_sha")).isEqualTo("test-sha");
         assertThat(values.get("docker")).isEqualTo("test-docker");
         assertThat((Integer) values.get("cores")).isPositive();

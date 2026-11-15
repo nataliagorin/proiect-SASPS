@@ -1,7 +1,6 @@
 package ro.saga.transfer.benchmark;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -27,21 +26,17 @@ public class BenchmarkOutput {
 
     private final BenchmarkProperties properties;
     private final Path directory;
-    private final int poolSize;
     private final CsvResultWriter csv;
     private final RawDataWriter raw;
 
     @Autowired
-    public BenchmarkOutput(
-            BenchmarkProperties properties,
-            @Value("${app.datasource.alpha-bank.hikari.maximum-pool-size:10}") int poolSize) {
-        this(properties, Path.of(properties.outputDir()), poolSize);
+    public BenchmarkOutput(BenchmarkProperties properties) {
+        this(properties, Path.of(properties.outputDir()));
     }
 
-    BenchmarkOutput(BenchmarkProperties properties, Path directory, int poolSize) {
+    BenchmarkOutput(BenchmarkProperties properties, Path directory) {
         this.properties = properties;
         this.directory = directory;
-        this.poolSize = poolSize;
         this.csv = new CsvResultWriter(directory.resolve(RESULTS_FILE));
         this.raw = new RawDataWriter(directory.resolve(RAW_DIRECTORY));
     }
@@ -52,7 +47,7 @@ public class BenchmarkOutput {
 
     /** At the start of a campaign. */
     public void writeEnvironment() {
-        EnvironmentReport.write(directory.resolve(ENVIRONMENT_FILE), EnvironmentReport.collect(properties, poolSize));
+        EnvironmentReport.write(directory.resolve(ENVIRONMENT_FILE), EnvironmentReport.collect(properties));
     }
 
     /** After every run: raw files first, then the CSV row that points to them. */

@@ -64,7 +64,7 @@ class BenchmarkCampaignIntegrationTest extends AbstractBankIntegrationTest {
         properties.sampleIntervalMs = 20;
         BenchmarkProperties built = properties.build();
         BenchmarkEngine engine = new BenchmarkEngine(variants, ledger, invariants, faults, fraud, built, true, 1000, 200);
-        BenchmarkOutput benchmarkOutput = new BenchmarkOutput(built, output, 20);
+        BenchmarkOutput benchmarkOutput = new BenchmarkOutput(built, output);
 
         BenchmarkCampaign.Summary summary = new BenchmarkCampaign(engine, benchmarkOutput, built, 20).run();
 

@@ -14,14 +14,16 @@ import java.util.stream.Collectors;
 
 /**
  * {@code environment.json}: the machine and JVM a campaign ran on, so results from different laptops are not
- * compared by mistake. The run script passes the git SHA and the Docker version.
+ * compared by mistake. The run script passes the git SHA and the Docker version. Every benchmark JVM of a campaign
+ * rewrites it with the same values.
  */
 public final class EnvironmentReport {
 
     private EnvironmentReport() {
     }
 
-    public static Map<String, Object> collect(BenchmarkProperties properties, int poolSize) {
+    /** Machine-level facts only; per-run settings (scenario, pool size, ...) are columns of the CSV. */
+    public static Map<String, Object> collect(BenchmarkProperties properties) {
         Runtime runtime = Runtime.getRuntime();
         Map<String, Object> values = new LinkedHashMap<>();
         values.put("date", Instant.now().toString());
@@ -36,11 +38,6 @@ public final class EnvironmentReport {
         values.put("jvm_flags", ManagementFactory.getRuntimeMXBean().getInputArguments());
         values.put("max_heap_bytes", runtime.maxMemory());
         values.put("docker", properties.dockerVersion());
-        values.put("pool_size", poolSize);
-        values.put("scenario", properties.scenario());
-        values.put("transfers", properties.transfers());
-        values.put("warmup_transfers", properties.warmupTransfers());
-        values.put("seed", properties.seed());
         return values;
     }
 
