@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Runs the M1 measurement campaign (docs/experiments.md, "Ce rulăm în M1") and writes everything to results/.
+# Runs the M1 measurement campaign (docs/experiments.md, "Ce rulăm în M1"), draws charts G1-G4 into results/ and
+# regenerates the class graphs G10 in analysis/graphs/.
 #
 #   scripts/run-m1.sh                    full campaign, about an hour
 #   scripts/run-m1.sh --quick            1000 transfers, 1 repetition: checks the pipeline in a few minutes
@@ -30,7 +31,7 @@ while [[ $# -gt 0 ]]; do
         --skip-build) SKIP_BUILD=true ;;
         --scenarios) SCENARIOS="$2"; shift ;;
         --skip-plots) SKIP_PLOTS=true ;;
-        -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
+        -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
         *) echo "Unknown option: $1 (see --help)" >&2; exit 2 ;;
     esac
     shift
@@ -156,11 +157,21 @@ if ! $SKIP_PLOTS && [[ -f "$RESULTS_DIR/runs.csv" ]]; then
     .venv/bin/python analysis/plot_m1.py --results "$RESULTS_DIR" || FAILED=1
 fi
 
+# --- Class graphs (G10) ---------------------------------------------------------------------------------------------
+
+if command -v dot >/dev/null; then
+    log "Dependency graphs G10"
+    analysis/deps.sh plain || FAILED=1
+else
+    echo "Graphviz not installed; skipping analysis/deps.sh (sudo apt install graphviz)" >&2
+fi
+
 log "Results"
 echo "CSV:          $RESULTS_DIR/runs.csv ($(($(wc -l < "$RESULTS_DIR/runs.csv") - 1)) runs)"
 echo "Raw data:     $RESULTS_DIR/raw/"
 echo "Environment:  $RESULTS_DIR/environment.json"
 $SKIP_PLOTS || echo "Charts:       $RESULTS_DIR/plots/ (table view: $RESULTS_DIR/summary.md)"
+echo "Class graphs: analysis/graphs/packages.svg, analysis/graphs/v1-classes.svg"
 
 if [[ "$FAILED" -ne 0 ]]; then
     echo "At least one run broke the acceptance gate or failed; check the logs above." >&2
