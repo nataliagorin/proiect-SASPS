@@ -117,6 +117,8 @@ docker exec saga-beta-bank psql -U saga -d beta_bank -c "select version, descrip
 
 ## Executare transferuri (REST API)
 
+Swagger UI este disponibil la [http://localhost:8080/](http://localhost:8080/) (redirecționează către `/swagger-ui.html`), iar specificația OpenAPI la `/v3/api-docs`. De acolo se pot testa direct toate endpoint-urile de mai jos.
+
 Aplicația expune endpoint-uri REST pentru crearea și interogarea transferurilor (folosind varianta activă din `app.web.variant`, implicit `V1`):
 
 1. **Inițierea unui transfer între bănci:**

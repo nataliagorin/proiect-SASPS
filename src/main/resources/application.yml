@@ -40,6 +40,11 @@ app:
   web:
     variant: V1
 
+# Swagger UI: http://localhost:8080/ redirects to the UI; the OpenAPI spec is at /v3/api-docs.
+springdoc:
+  swagger-ui:
+    use-root-path: true
+
 management:
   endpoints:
     web:
