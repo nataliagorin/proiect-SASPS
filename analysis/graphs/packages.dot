@@ -1,0 +1,27 @@
+digraph "classes" {
+    graph [rankdir=LR, fontname="Helvetica", bgcolor="#fcfcfb", nodesep=0.25, ranksep=0.7];
+    node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11,
+           color="#86b6ef", fillcolor="#cde2fb", fontcolor="#0b0b0b"];
+    edge  [color="#52514e", arrowsize=0.6];
+    "audit" -> "common";
+    "bank" -> "common";
+    "bank" -> "config";
+    "bank.alpha" -> "bank";
+    "bank.alpha" -> "common";
+    "bank.beta" -> "bank";
+    "bank.beta" -> "common";
+    "benchmark" -> "bank";
+    "benchmark" -> "common";
+    "benchmark" -> "fault";
+    "benchmark" -> "fraud";
+    "config" -> "bank.alpha";
+    "config" -> "bank.beta";
+    "fault" -> "common";
+    "fraud" -> "common";
+    "observability" -> "common";
+    "plain" -> "bank";
+    "plain" -> "common";
+    "web" -> "bank";
+    "web" -> "common";
+    "web" -> "observability";
+}

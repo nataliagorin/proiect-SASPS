@@ -1,0 +1,44 @@
+digraph "classes" {
+    graph [rankdir=LR, fontname="Helvetica", bgcolor="#fcfcfb", nodesep=0.25, ranksep=0.7];
+    node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11,
+           color="#86b6ef", fillcolor="#cde2fb", fontcolor="#0b0b0b"];
+    edge  [color="#52514e", arrowsize=0.6];
+    "bank.BankOperations" -> "bank.TransferRecord";
+    "bank.BankOperations" -> "common.Bank";
+    "bank.BankOperations" -> "common.TransferRequest";
+    "bank.Banks" -> "bank.BankOperations";
+    "bank.Banks" -> "common.Bank";
+    "bank.TransferRecord" -> "common.TransferStatus";
+    "common.AuditService" -> "common.TransferOutcome";
+    "common.FaultInjector" -> "common.FaultPoint";
+    "common.FraudCheckService" -> "common.FraudDecision";
+    "common.FraudCheckService" -> "common.TransferRequest";
+    "common.TransferRequest" -> "common.Bank";
+    "common.TransferResult" -> "common.TransferOutcome";
+    "common.TransferResult" -> "common.TransferStatus";
+    "common.TransferService" -> "common.TransferRequest";
+    "common.TransferService" -> "common.TransferResult";
+    "plain.PlainTransferService" -> "bank.BankOperations";
+    "plain.PlainTransferService" -> "bank.Banks";
+    "plain.PlainTransferService" -> "bank.DuplicateTransferException";
+    "plain.PlainTransferService" -> "bank.InsufficientFundsException";
+    "plain.PlainTransferService" -> "bank.TransferRecord";
+    "plain.PlainTransferService" -> "common.AuditService";
+    "plain.PlainTransferService" -> "common.Bank";
+    "plain.PlainTransferService" -> "common.BankUnavailableException";
+    "plain.PlainTransferService" -> "common.FaultInjector";
+    "plain.PlainTransferService" -> "common.FaultPoint";
+    "plain.PlainTransferService" -> "common.FraudCheckService";
+    "plain.PlainTransferService" -> "common.FraudDecision";
+    "plain.PlainTransferService" -> "common.TransferOutcome";
+    "plain.PlainTransferService" -> "common.TransferRequest";
+    "plain.PlainTransferService" -> "common.TransferResult";
+    "plain.PlainTransferService" -> "common.TransferService";
+    "plain.PlainTransferService" -> "common.TransferStatus";
+    "plain.RecoveryJob" -> "bank.BankOperations";
+    "plain.RecoveryJob" -> "bank.Banks";
+    "plain.RecoveryJob" -> "bank.TransferRecord";
+    "plain.RecoveryJob" -> "common.Bank";
+    "plain.RecoveryJob" [fillcolor="#2a78d6", color="#256abf", fontcolor="#ffffff"];
+    "plain.PlainTransferService" [fillcolor="#2a78d6", color="#256abf", fontcolor="#ffffff"];
+}

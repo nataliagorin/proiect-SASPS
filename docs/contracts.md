@@ -66,12 +66,17 @@ Timpul dintre `created_at` (commit-ul debitului) și `finalized_at` (starea term
 | `app.compensation.max-attempts`, `app.compensation.backoff-ms` | varianta V1 | Retry la compensare |
 | `app.recovery.interval-ms`, `app.recovery.stale-after-ms` | varianta V1 | Frecvența și pragul jobului de recuperare |
 | `app.benchmark.variants`, `.transfers`, `.warmup-transfers`, `.failure-rates`, `.threads`, `.repetitions`, `.seed`, `.output-dir` | `feature/benchmark` | Matricea de rulare, în `application-benchmark.yml` |
+| `app.benchmark.scenario` | `feature/benchmark` | Eticheta scenariului în CSV (`baseline`, `fraud`, `pool`, `contention`, `sampling`) |
+| `app.benchmark.distribution`, `.hot-accounts`, `.zipf-exponent` | `feature/benchmark` | Alegerea conturilor: `uniform` pe 1–100 sau `zipf` pe conturile fierbinți 1..`hot-accounts` (contenție) |
+| `app.benchmark.min-amount`, `.max-amount` | `feature/benchmark` | Sumele transferurilor, în lei întregi (implicit 1–50) |
+| `app.benchmark.sample-interval-ms` | `feature/benchmark` | Intervalul de eșantionare a banilor în zbor (implicit 100) |
+| `app.benchmark.git-sha`, `.docker-version` | `feature/benchmark` | Date de mediu primite de la `scripts/run-m1.sh`, scrise în CSV și `environment.json` |
 
 ## Schema CSV a benchmark-ului
 
 Cum se obține fiecare coloană și protocolul de rulare sunt în [experiments.md](experiments.md).
 
-Un rând pe configurație și repetare, în `results/`. Timpii sunt în milisecunde.
+Un rând pe configurație și repetare, în `results/runs.csv`. Timpii sunt în milisecunde. Numerele folosesc punct zecimal indiferent de locale; o valoare care nu există (de exemplu nicio fereastră de inconsistență) e o celulă goală.
 
 ```
 run_id, git_sha, timestamp, variant, scenario, repetition, seed, failure_rate, threads, pool_size,
@@ -82,4 +87,12 @@ latency_mean_ms, latency_p50_ms, latency_p95_ms, latency_p99_ms,
 duration_s, throughput_tps
 ```
 
-Latențele brute ale fiecărui transfer se salvează separat în `results/raw/`, iar p95 se calculează pe setul unit al repetărilor, nu ca medie de p95.
+Datele brute se salvează separat în `results/raw/`, iar p95 se calculează pe setul unit al repetărilor, nu ca medie de p95:
+
+| Fișier | Coloane |
+|---|---|
+| `raw/<run_id>.csv` | `thread, sequence, outcome, latency_ms`: fiecare transfer măsurat |
+| `raw/<run_id>-windows.csv` | `window_ms`: fereastra de inconsistență a fiecărui transfer finalizat |
+| `raw/<run_id>-inflight.csv` | `elapsed_ms, total_money, inflight_money`: eșantioanele luate în timpul rulării |
+
+`run_id` are forma `<campanie>-<variantă>-<scenariu>-f<rată>-t<thread-uri>-p<pool>-rep<n>`, de exemplu `20261115T120000-V1-baseline-f0.10-t8-p10-rep2`.

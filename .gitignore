@@ -35,3 +35,9 @@ desktop.ini
 # Local environment
 .env
 *.local
+
+# Benchmark output (scripts/run-m1.sh) and the Python environment of analysis/
+results/
+results.*/
+.venv/
+__pycache__/

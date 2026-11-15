@@ -31,3 +31,23 @@ jobs:
           name: test-reports
           path: target/surefire-reports/
           if-no-files-found: ignore
+
+  # Unit tests of the benchmark charts (analysis/plot_m1.py); no database needed.
+  analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: analysis/requirements.txt
+
+      - name: Test analysis scripts
+        run: |
+          pip install -r analysis/requirements.txt
+          python -m unittest discover -s analysis -v

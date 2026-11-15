@@ -1,0 +1,4 @@
+# Analysis of the benchmark results: .venv/bin/pip install -r analysis/requirements.txt
+matplotlib==3.11.2
+numpy==2.5.4
+pandas==3.1.1

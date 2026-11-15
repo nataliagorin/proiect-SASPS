@@ -76,18 +76,19 @@ Pentru fiecare configurație (variantă × rată × thread-uri × …) și fieca
 
 1. `LedgerService.resetData()`.
 2. **Warmup:** primele `app.benchmark.warmup-transfers` transferuri (implicit 200) se rulează și nu se măsoară. Apoi din nou `resetData()`.
-3. **Măsurare:** `app.benchmark.transfers` transferuri (implicit 10.000), împărțite pe thread-uri. Fiecare thread ia perechi de conturi și sume dintr-un `Random` cu seed derivat din `app.benchmark.seed`, repetare și index de thread.
+3. **Măsurare:** `app.benchmark.transfers` transferuri (implicit 10.000), împărțite pe thread-uri. Fiecare thread ia perechi de conturi și sume dintr-un `Random` cu seed derivat din `app.benchmark.seed`, repetare și index de thread. Transferurile se generează înainte de pornirea cronometrului, iar thread-urile (`benchmark-0`, `benchmark-1`, …) pornesc toate odată. Erorile injectate au seed-ul `seed × 31 + repetare`, deci repetările sunt eșantioane independente, dar reproductibile. Banii în zbor se eșantionează la `app.benchmark.sample-interval-ms` până la sfârșitul quiescence.
 4. **Quiescence:** se așteaptă până `LedgerService.countPendingTransfers() == 0`, cel mult `2 × app.recovery.stale-after-ms + app.recovery.interval-ms`. Dacă nu se ajunge acolo, se notează `pending_left`.
-5. Verificare invarianți, apoi un rând în `results/*.csv` și latențele brute în `results/raw/`.
+5. Verificare invarianți, apoi un rând în `results/runs.csv` și datele brute în `results/raw/` (vezi [contracts.md](contracts.md)).
 
 Reguli:
 
-- Cel puțin 3 repetări, 5 pentru scenariile zgomotoase (latență injectată, outage). Se raportează media ± deviația standard.
+- Cel puțin 3 repetări, 5 pentru scenariile zgomotoase (latență injectată, outage). Mediile se raportează cu intervalul de încredere 95% (t-Student) peste repetări; pentru percentile, intervalul vine din bootstrap pe valorile brute unite.
 - p95 nu se mediază. Se calculează pe latențele brute unite din toate repetările; separat se raportează media p95-urilor cu deviația ei.
 - Seed-ul fix intră în CSV, ca orice rulare să poată fi refăcută.
 - Același laptop, la priză, aplicații închise, `-Xms` = `-Xmx`. Hardware-ul, JVM-ul, flag-urile, versiunea Docker și `git_sha` se scriu în `results/environment.json`.
 - Thread-uri de platformă. Thread-urile virtuale sunt doar un experiment opțional.
-- Benchmark-ul nu rulează în CI și nici la `mvnw install`. Pornește doar cu profilul `benchmark` (`scripts/run-m1.sh`, apoi `run-all.sh`).
+- Benchmark-ul nu rulează în CI și nici la `mvnw install`. Pornește doar cu profilul `benchmark` (`scripts/run-m1.sh`, apoi `run-all.sh`). Workflow-ul manual `smoke-benchmark.yml` rulează doar o matrice mică, ca verificare a lanțului, nu pentru cifre.
+- Percentilele folosesc interpolare liniară (tipul 7, implicit în numpy), la fel în Java (`Statistics`) și în Python (`plot_m1.py`).
 
 ## Scenarii
 
@@ -141,3 +142,7 @@ Toate graficele au bare de eroare din repetări. Se generează cu `analysis/plot
 - JIT și GC influențează primele secunde, de aceea există warmup.
 - Sarcina e sintetică, iar băncile și antifrauda sunt simulate.
 - Pool-ul Hikari (implicit 10, timeout 3 s) poate limita throughput-ul peste 8 thread-uri, de aceea e factor experimental.
+- Sarcina e în buclă închisă: fiecare thread trimite transferul următor doar după răspuns. Latența măsurată e timpul de serviciu sub acea concurență, nu latența la o rată fixă de sosire (coordinated omission); o variantă lentă primește automat mai puține cereri.
+- Eșantionarea banilor în zbor face două interogări la ~100 ms prin aceleași pool-uri ca transferurile. Efectul e neglijabil, dar există.
+- Cu mai multe thread-uri, ordinea în care se ating soldurile depinde de planificarea thread-urilor, deci rezultatele exacte (de exemplu un `REJECTED_INSUFFICIENT_FUNDS` rar) se repetă garantat doar la 1 thread; la mai multe se repetă statistic.
+- Fereastra de inconsistență are o distribuție cu mai multe moduri (fără retry, cu backoff de compensare, prin `RecoveryJob`). La rate mari de eroare p95 cade între moduri, iar intervalul lui de încredere e larg; asta descrie datele, nu e o eroare de măsurare.

@@ -192,6 +192,39 @@ curl -X POST localhost:8474/proxies/beta_bank -d '{"enabled":true}'
 
 Metricile sunt la `GET /actuator/metrics/transfer.duration`.
 
+## Benchmark
+
+Benchmark-ul măsoară varianta de transfer pe bazele reale și scrie rezultatele în `results/`. Metodologia e în [docs/experiments.md](docs/experiments.md), schema CSV în [docs/contracts.md](docs/contracts.md).
+
+Toată campania M1 (aproximativ o oră; laptop la priză, aplicații închise):
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64   # dacă java -version nu arată 25
+scripts/run-m1.sh
+```
+
+Scriptul pornește bazele, construiește jar-ul, rulează scenariile `baseline`, `fraud`, `pool` (5/10/20), `contention` și `sampling`, desenează graficele și regenerează grafurile de dependențe. Pentru o verificare rapidă (câteva minute): `scripts/run-m1.sh --quick`. Doar unele scenarii: `--scenarios "baseline sampling"`.
+
+Rezultate:
+
+| Ce | Unde |
+|---|---|
+| Un rând pe rulare | `results/runs.csv` |
+| Latențe, ferestre de inconsistență, bani în zbor | `results/raw/` |
+| Mașina, JVM-ul, `git_sha` | `results/environment.json` |
+| Graficele G1–G4 (SVG și PNG) și tabelul cu cifre | `results/plots/`, `results/summary.md` |
+| Grafurile de clase G10 | `analysis/graphs/packages.svg`, `analysis/graphs/v1-classes.svg` |
+
+O singură configurație, direct din jar:
+
+```bash
+./mvnw -DskipTests package
+java -jar target/saga-transfer-0.0.1-SNAPSHOT.jar --spring.profiles.active=benchmark \
+  --app.benchmark.transfers=1000 --app.benchmark.failure-rates=0.1 --app.benchmark.threads=8 --app.benchmark.repetitions=1
+```
+
+Graficele cer Python 3 (`python3 -m venv .venv && .venv/bin/pip install -r analysis/requirements.txt`; scriptul le instalează singur), iar grafurile cer Graphviz (`sudo apt install graphviz`). Testele analizei: `.venv/bin/python -m unittest discover -s analysis`.
+
 ## Arhitectura
 
 Diagrama și deciziile de arhitectură sunt în [docs/architecture.md](docs/architecture.md).
@@ -201,6 +234,12 @@ Diagrama și deciziile de arhitectură sunt în [docs/architecture.md](docs/arch
 ```
 .
 ├── .github/workflows/build.yml         # build-ul automat în GitHub Actions
+├── .github/workflows/smoke-benchmark.yml # benchmark mic, pornit manual
+├── analysis/
+│   ├── plot_m1.py, test_plot_m1.py     # graficele G1–G4 și summary.md, cu testele lor
+│   ├── deps.sh                         # grafurile de dependențe G10 (jdeps + Graphviz)
+│   └── graphs/                         # packages.svg, v1-classes.svg
+├── scripts/run-m1.sh                   # campania de măsurători M1
 ├── .editorconfig                       # reguli comune de formatare
 ├── docker-compose.yml                  # cele două baze PostgreSQL (alpha_bank, beta_bank)
 ├── docker-compose.chaos.yml            # Toxiproxy în fața băncilor
@@ -221,7 +260,7 @@ Diagrama și deciziile de arhitectură sunt în [docs/architecture.md](docs/arch
     │   ├── bank/                       # operațiile pe bănci, LedgerService, invarianți
     │   │   ├── alpha/                  # entitatea și repository-ul Alpha Bank
     │   │   └── beta/                   # entitatea și repository-ul Beta Bank
-    │   ├── benchmark/                  # măsurătorile (urmează)
+    │   ├── benchmark/                  # BenchmarkRunner: matricea, sarcina, CSV-ul
     │   ├── choreography/               # Saga cu coreografie (urmează)
     │   ├── common/                     # contractele comune variantelor de transfer
     │   ├── config/                     # DataSource, JPA, Flyway
